@@ -2,13 +2,15 @@
 #[macro_use]
 extern crate rocket;
 
+use comrak::{markdown_to_html, ComrakOptions};
+use rocket::response::{content, status};
 use std::fs;
 use std::path::PathBuf;
 
 const ROOT: &str = "/home/zac/Nextcloud/notes";
 
 #[get("/<path..>")]
-fn file(path: PathBuf) -> String {
+fn file(path: PathBuf) -> content::Html<String> {
     let mut full_path = PathBuf::from(ROOT);
     full_path.push(path);
 
@@ -16,9 +18,10 @@ fn file(path: PathBuf) -> String {
         Err(e) => String::from("error"),
         Ok(f) => f,
     };
-    return data;
+    let html = markdown_to_html(&data, &ComrakOptions::default());
+    return content::Html(html);
 }
 
 fn main() {
-    rocket::ignite().mount("/", routes![hello, file]).launch();
+    rocket::ignite().mount("/", routes![file]).launch();
 }
