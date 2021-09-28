@@ -700,6 +700,7 @@ name = "mdsee"
 version = "0.1.0"
 dependencies = [
  "comrak",
+ "regex",
  "rocket",
  "rocket_contrib",
  "walkdir",

@@ -1,2 +1,11 @@
-<h1>hello</h1>
+<h1>Tags</h1>
+{{#each tags}}
+
+<a href="/tags/{{this}}">
+    <p>
+        #{{this}}
+    </p>
+</a>
+
+{{/each}}
 {{~> layout~}}
