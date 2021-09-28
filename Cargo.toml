@@ -8,6 +8,7 @@ edition = "2018"
 [dependencies]
 rocket = "0.4.10"
 comrak = "0.10"
+walkdir = "2"
 
 [dependencies.rocket_contrib]
 version = "0.4.10"

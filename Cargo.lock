@@ -702,6 +702,7 @@ dependencies = [
  "comrak",
  "rocket",
  "rocket_contrib",
+ "walkdir",
 ]
 
 [[package]]
