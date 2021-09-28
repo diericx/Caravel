@@ -25,7 +25,14 @@ fn file(path: PathBuf) -> Template {
 
     let mut context = HashMap::new();
     context.insert("content".to_string(), html.to_string());
-    return Template::render("layout", &context);
+    return Template::render("note", &context);
+}
+
+#[get("/")]
+fn tags() -> Template {
+    let mut context = HashMap::new();
+    context.insert("tags".to_string(), "".to_string());
+    return Template::render("tags", &context);
 }
 
 fn main() {
@@ -38,5 +45,6 @@ fn main() {
             StaticFiles::from(concat!(env!("CARGO_MANIFEST_DIR"), "/static")),
         )
         .mount("/notes", routes![file])
+        .mount("/tags", routes![tags])
         .launch();
 }
