@@ -5,12 +5,18 @@ extern crate rocket;
 mod mdlib;
 
 use comrak::{markdown_to_html, ComrakOptions};
+use handlebars::{
+    Context, Handlebars, Helper, HelperDef, HelperResult, JsonRender, Output, RenderContext,
+    RenderError,
+};
 use regex::Regex;
 use rocket_contrib::serve::StaticFiles;
 use rocket_contrib::templates::Template;
+use serde::Serialize;
 use std::collections::HashMap;
 use std::fs;
 use std::io::BufReader;
+use std::io::Write;
 use std::io::{self, BufRead};
 use std::path::PathBuf;
 use walkdir::DirEntry;
@@ -32,15 +38,27 @@ fn file(path: PathBuf) -> Template {
 
     let mut context = HashMap::new();
     context.insert("content".to_string(), html.to_string());
-    return Template::render("note", &context);
+    return Template::render("notes/show", &context);
 }
 
 #[get("/")]
 fn tags() -> Template {
     let mut context = HashMap::new();
-    let tags = mdlib::get_tags_from_dir(ROOT);
+    let tags = mdlib::get_tags(ROOT);
     context.insert(String::from("tags"), tags);
-    return Template::render("tags", &context);
+    return Template::render("tags/index", &context);
+}
+
+#[get("/<tag>")]
+fn tag(tag: String) -> Template {
+    #[derive(Serialize)]
+    struct Context {
+        files: Vec<mdlib::File>,
+        tag: String,
+    }
+
+    let files = mdlib::get_files_with_tag(ROOT, &tag);
+    return Template::render("tags/show", Context { files, tag });
 }
 
 fn main() {
@@ -53,6 +71,6 @@ fn main() {
             StaticFiles::from(concat!(env!("CARGO_MANIFEST_DIR"), "/static")),
         )
         .mount("/notes", routes![file])
-        .mount("/tags", routes![tags])
+        .mount("/tags", routes![tags, tag])
         .launch();
 }

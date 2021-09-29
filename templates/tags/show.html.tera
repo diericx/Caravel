@@ -1,0 +1,21 @@
+{% extends "base" %}
+{% block content %}
+<h1> #{{tag}} </h1>
+
+<ul>
+
+{% for file in files %}
+    <li>
+        {% for file_tag in file.tags %}
+            #{{ file_tag }}
+        {% endfor %}
+        <br/>
+        <a href="/notes/{{ file.path }}">
+            {{ file.name }}
+        </a>
+    </li>
+{% endfor %}
+
+</ul>
+
+{% endblock content %}

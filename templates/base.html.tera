@@ -4,6 +4,6 @@
 <!DOCTYPE html>
 <html>
 <body>
-    {{~> content}}
+    {% block content %}{% endblock content %}
 </body>
 </html>
