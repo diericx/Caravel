@@ -5,22 +5,12 @@ extern crate rocket;
 mod mdlib;
 
 use comrak::{markdown_to_html, ComrakOptions};
-use handlebars::{
-    Context, Handlebars, Helper, HelperDef, HelperResult, JsonRender, Output, RenderContext,
-    RenderError,
-};
-use regex::Regex;
 use rocket_contrib::serve::StaticFiles;
 use rocket_contrib::templates::Template;
 use serde::Serialize;
 use std::collections::HashMap;
 use std::fs;
-use std::io::BufReader;
-use std::io::Write;
-use std::io::{self, BufRead};
 use std::path::PathBuf;
-use walkdir::DirEntry;
-use walkdir::WalkDir;
 
 const ROOT: &str = env!("NOTES_ROOT");
 const TAG_CHAR: &str = "#";

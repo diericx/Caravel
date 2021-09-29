@@ -2,13 +2,11 @@
 use crate::TAG_CHAR;
 
 use regex::Regex;
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use std::fs;
+use std::io::BufRead;
 use std::io::BufReader;
-use std::io::{self, BufRead};
-use std::path::PathBuf;
-use walkdir::DirEntry;
-use walkdir::WalkDir;
+use walkdir::{DirEntry, WalkDir};
 
 #[derive(Serialize)]
 pub struct File {
@@ -49,7 +47,6 @@ fn get_markdown_files_recursive(root: String) -> Vec<DirEntry> {
 }
 
 fn get_tags_from_file(file: &DirEntry) -> Vec<String> {
-    let tags: Vec<String> = Vec::new();
     // Open the file
     let file = match fs::File::open(file.path()) {
         Ok(file) => file,
@@ -92,7 +89,6 @@ fn get_tags_from_line(line: String) -> Vec<String> {
 
 pub fn get_tags(dir: &str) -> Vec<String> {
     let mut tags: Vec<String> = Vec::new();
-    let root: String = dir.to_string();
     let files = get_markdown_files_recursive(dir.to_string());
     for f in files.into_iter() {
         tags.extend(get_tags_from_file(&f));
@@ -104,7 +100,6 @@ pub fn get_tags(dir: &str) -> Vec<String> {
 
 pub fn get_files_with_tag(dir: &str, tag: &String) -> Vec<File> {
     let mut files: Vec<File> = Vec::new();
-    let root: String = dir.to_string();
     let dir_entries = get_markdown_files_recursive(dir.to_string());
     for f in dir_entries.into_iter() {
         let tags = get_tags_from_file(&f);
