@@ -6,6 +6,7 @@ mod config;
 mod mdlib;
 
 use comrak::{markdown_to_html, ComrakOptions};
+use rocket::response::Redirect;
 use rocket::State;
 use rocket_contrib::serve::StaticFiles;
 use rocket_contrib::templates::Template;
@@ -16,6 +17,11 @@ use std::fs;
 use std::path::PathBuf;
 
 const TAG_CHAR: &str = "#";
+
+#[get("/")]
+fn index(_config: State<config::Config>) -> Redirect {
+    Redirect::to("/file/index.md")
+}
 
 #[get("/<path..>")]
 fn file(config: State<config::Config>, path: PathBuf) -> Template {
@@ -65,8 +71,9 @@ fn main() {
             "/public",
             StaticFiles::from(concat!(env!("CARGO_MANIFEST_DIR"), "/static")),
         )
-        .mount("/notes", routes![file])
         .mount("/tags", routes![tags, tag])
+        .mount("/file", routes![file])
+        .mount("/", routes![index])
         .manage(config)
         .launch();
 }
