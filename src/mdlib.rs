@@ -1,4 +1,4 @@
-// mdlib is a crate that helps explore a markdown library (read only)
+// mdlib helps explore a markdown library (read only)
 use crate::TAG_CHAR;
 
 use regex::Regex;
@@ -11,7 +11,7 @@ use walkdir::{DirEntry, WalkDir};
 #[derive(Serialize)]
 pub struct File {
     name: String,
-    path: String,
+    local_path: String,
     tags: Vec<String>,
 }
 
@@ -36,7 +36,7 @@ fn is_file_markdown(entry: &DirEntry) -> bool {
 }
 
 // Returns a vector of markdown files recursively searched in the provided directory
-fn get_markdown_files_recursive(root: String) -> Vec<DirEntry> {
+fn get_markdown_files_recursive(root: &String) -> Vec<DirEntry> {
     return WalkDir::new(root)
         .into_iter()
         .filter_map(Result::ok)
@@ -87,9 +87,9 @@ fn get_tags_from_line(line: String) -> Vec<String> {
     return tags;
 }
 
-pub fn get_tags(dir: &str) -> Vec<String> {
+pub fn get_tags(root_dir: &String) -> Vec<String> {
     let mut tags: Vec<String> = Vec::new();
-    let files = get_markdown_files_recursive(dir.to_string());
+    let files = get_markdown_files_recursive(root_dir);
     for f in files.into_iter() {
         tags.extend(get_tags_from_file(&f));
     }
@@ -98,16 +98,16 @@ pub fn get_tags(dir: &str) -> Vec<String> {
     return tags;
 }
 
-pub fn get_files_with_tag(dir: &str, tag: &String) -> Vec<File> {
+pub fn get_files_with_tag(root_dir: &String, tag: &String) -> Vec<File> {
     let mut files: Vec<File> = Vec::new();
-    let dir_entries = get_markdown_files_recursive(dir.to_string());
+    let dir_entries = get_markdown_files_recursive(root_dir);
     for f in dir_entries.into_iter() {
         let tags = get_tags_from_file(&f);
-        let relative_path = f.path().strip_prefix(crate::ROOT).unwrap();
+        let relative_path = f.path().strip_prefix(root_dir).unwrap();
         if tags.contains(&tag) {
             files.push(File {
                 name: f.file_name().to_string_lossy().to_string(),
-                path: relative_path.to_string_lossy().to_string(),
+                local_path: relative_path.to_string_lossy().to_string(),
                 tags,
             });
         }
