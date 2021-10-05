@@ -67,10 +67,7 @@ fn main() {
 
     rocket::ignite()
         .attach(Template::fairing())
-        .mount(
-            "/public",
-            StaticFiles::from(concat!(env!("CARGO_MANIFEST_DIR"), "/static")),
-        )
+        .mount("/public", StaticFiles::from("./static"))
         .mount("/tags", routes![tags, tag])
         .mount("/file", routes![file])
         .mount("/", routes![index])
