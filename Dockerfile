@@ -3,8 +3,6 @@ FROM rust:1.55 as builder
 RUN USER=root cargo new --bin scriven 
 WORKDIR ./scriven
 COPY ./Cargo.toml ./Cargo.toml
-COPY ./templates ./templates
-COPY ./static ./static
 RUN rustup default nightly
 RUN cargo build --release
 RUN rm src/*.rs
@@ -30,6 +28,8 @@ RUN groupadd $APP_USER \
     && mkdir -p ${APP}
 
 COPY --from=builder /scriven/target/release/scriven ${APP}/scriven
+COPY --from=builder /scriven/templates ${APP}/templates
+COPY --from=builder /scriven/static ${APP}/static
 
 RUN chown -R $APP_USER:$APP_USER ${APP}
 
