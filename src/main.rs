@@ -6,6 +6,8 @@ mod config;
 mod mdlib;
 
 use comrak::{markdown_to_html, ComrakOptions};
+use regex::Captures;
+use regex::Regex;
 use rocket::response::Redirect;
 use rocket::State;
 use rocket_contrib::serve::StaticFiles;
@@ -25,10 +27,12 @@ fn file(config: State<config::Config>, path: PathBuf) -> Template {
     let mut full_path = PathBuf::from(&config.root_dir);
     full_path.push(path);
 
-    let data = match fs::read_to_string(full_path) {
+    let mut data = match fs::read_to_string(full_path) {
         Err(e) => format!("Error: {}", e.to_string()),
         Ok(f) => f,
     };
+    data = tags_to_links_from_string(data, &config.tag_char);
+
     let html = markdown_to_html(&data, &ComrakOptions::default());
 
     let mut context = HashMap::new();
@@ -70,4 +74,18 @@ fn main() {
         .mount("/", routes![index])
         .manage(config)
         .launch();
+}
+
+fn tags_to_links_from_string(orig: String, tag_char: &String) -> String {
+    let inline_code_regex =
+        Regex::new(format!("`([A-Za-z0-9{} _-]+)`", tag_char).as_str()).unwrap();
+    let tags_regex = Regex::new(format!("({}[A-Za-z0-9_-]+)", tag_char).as_str()).unwrap();
+    let result = inline_code_regex.replace_all(&orig, |caps: &Captures| {
+        let result = tags_regex.replace_all(&caps[1], |caps: &Captures| {
+            let raw_tag = &caps[1].replace(tag_char, "");
+            format!("[{}](/tags/{})", &caps[1], raw_tag)
+        });
+        return format!("{}", result);
+    });
+    return result.to_string();
 }
