@@ -12,11 +12,8 @@ use rocket_contrib::serve::StaticFiles;
 use rocket_contrib::templates::Template;
 use serde::Serialize;
 use std::collections::HashMap;
-use std::env;
 use std::fs;
 use std::path::PathBuf;
-
-const TAG_CHAR: &str = "#";
 
 #[get("/")]
 fn index(_config: State<config::Config>) -> Redirect {
@@ -42,7 +39,7 @@ fn file(config: State<config::Config>, path: PathBuf) -> Template {
 #[get("/")]
 fn tags(config: State<config::Config>) -> Template {
     let mut context = HashMap::new();
-    let tags = mdlib::get_tags(&config.root_dir);
+    let tags = mdlib::get_tags(&config.root_dir, &config.tag_char);
     context.insert(String::from("tags"), tags);
     return Template::render("tags/index", &context);
 }
@@ -55,7 +52,7 @@ fn tag(config: State<config::Config>, tag: String) -> Template {
         tag: String,
     }
 
-    let files = mdlib::get_files_with_tag(&config.root_dir, &tag);
+    let files = mdlib::get_files_with_tag(&config.root_dir, &tag, &config.tag_char);
     return Template::render("tags/show", Context { files, tag });
 }
 

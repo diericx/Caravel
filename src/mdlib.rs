@@ -1,5 +1,4 @@
 // mdlib helps explore a markdown library (read only)
-use crate::TAG_CHAR;
 
 use regex::Regex;
 use serde::Serialize;
@@ -46,7 +45,7 @@ fn get_markdown_files_recursive(root: &String) -> Vec<DirEntry> {
         .collect();
 }
 
-fn get_tags_from_file(file: &DirEntry) -> Vec<String> {
+fn get_tags_from_file(tag_char: &String, file: &DirEntry) -> Vec<String> {
     // Open the file
     let file = match fs::File::open(file.path()) {
         Ok(file) => file,
@@ -61,10 +60,10 @@ fn get_tags_from_file(file: &DirEntry) -> Vec<String> {
         Err(_) => return Vec::new(),
     };
 
-    return get_tags_from_line(first_line);
+    return get_tags_from_line(tag_char, first_line);
 }
 
-fn get_tags_from_line(line: String) -> Vec<String> {
+fn get_tags_from_line(tag_char: &String, line: String) -> Vec<String> {
     let mut tags: Vec<String> = Vec::new();
 
     // Opinionated rule, tag line is the first line if and only if it is a simple code line
@@ -81,28 +80,28 @@ fn get_tags_from_line(line: String) -> Vec<String> {
 
     tags_str
         .split(" ")
-        .map(|t| t.replace(TAG_CHAR, ""))
+        .map(|t| t.replace(tag_char, ""))
         .for_each(|t| tags.push(t.to_string()));
 
     return tags;
 }
 
-pub fn get_tags(root_dir: &String) -> Vec<String> {
+pub fn get_tags(root_dir: &String, tag_char: &String) -> Vec<String> {
     let mut tags: Vec<String> = Vec::new();
     let files = get_markdown_files_recursive(root_dir);
     for f in files.into_iter() {
-        tags.extend(get_tags_from_file(&f));
+        tags.extend(get_tags_from_file(tag_char, &f));
     }
     tags.sort_unstable();
     tags.dedup();
     return tags;
 }
 
-pub fn get_files_with_tag(root_dir: &String, tag: &String) -> Vec<File> {
+pub fn get_files_with_tag(root_dir: &String, tag: &String, tag_char: &String) -> Vec<File> {
     let mut files: Vec<File> = Vec::new();
     let dir_entries = get_markdown_files_recursive(root_dir);
     for f in dir_entries.into_iter() {
-        let tags = get_tags_from_file(&f);
+        let tags = get_tags_from_file(tag_char, &f);
         let relative_path = f.path().strip_prefix(root_dir).unwrap();
         if tags.contains(&tag) {
             files.push(File {
